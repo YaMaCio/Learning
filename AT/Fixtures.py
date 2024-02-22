@@ -1,12 +1,12 @@
 import pytest
 class Calculator:
-    def add(first, second):
+    def add(self, first, second):
         return first + second
-    def sub(first, second):
+    def sub(self, first, second):
         return first - second
-    def multiple(first, second):
+    def multiple(self, first, second):
         return first * second
-    def divide(first, second):
+    def divide(self, first, second):
         return first / second
         
 @pytest.fixture
