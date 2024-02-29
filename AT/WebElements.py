@@ -4,16 +4,17 @@ import pytest
 import os
 
 link = "https://testpages.eviltester.com/styled/index.html"
-browser = driver = webdriver.Chrome()
+
 
 @pytest.fixture
-def setting():
-    browser = driver = webdriver.Chrome()
-    browser.implicitly_wait(10)
+def browser():
+    driver = webdriver.Chrome()
+    driver.implicitly_wait(10)
+    yield driver
+    driver.quit()
 
 class TestStringMethods():
-    def test_one(self):
-        setting()
+    def test_one(self, browser):
         browser.get(link)
         driver.find_element(By.XPATH, "//a[contains(text(),'HTML5 Element Form Test Page')]").click()
         driver.find_element(By.ID, "colour-picker").send_keys("#000000")
@@ -32,8 +33,7 @@ class TestStringMethods():
         assert driver.find_element(By.ID, "_valuenumber") == "42"
         browser.quit()
 
-    def test_two(self):
-        setting()
+    def test_two(self, browser):
         browser.get(link)
         driver.find_element(By.ID, "basicauth").click()
         usernameEl = driver.find_element(By.XPATH, "//p[contains(text(),'username')]")
@@ -44,8 +44,7 @@ class TestStringMethods():
         assert driver.find_element(By.ID, "status") == "Authenticated"
         browser.quit()
 
-    def test_three(self):
-        setting()
+    def test_three(self, browser):
         browser.get(link)
         driver.find_element(By.ID, "fileuploadtest").click()
         driver.find_element(By.ID, "itsafile").click()
@@ -55,8 +54,7 @@ class TestStringMethods():
         assert driver.find_element(By.XPATH, "//p[contains(text(),'You uploaded a file. This is the result')]").is_displayed()
         browser.quit()
 
-    def test_four(self):
-        setting()
+    def test_four(self, browser):
         browser.get(link)
         driver.find_element(By.ID, "alerttestjs").click()
         driver.find_element(By.ID, "alertexamples").click()
