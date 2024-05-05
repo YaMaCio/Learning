@@ -15,6 +15,7 @@ class Server(TriangleController, BaseWidget):
     def __init__(self, *args, **kwargs):
         TriangleController.__init__(self)
         BaseWidget.__init__(self,'Server')
+        tcpServer = TCPServer()
 
         #Definition of the forms fields
         self._tmpTriangle     = Triangle('-1', '-1', '-1', '-1')
@@ -28,7 +29,8 @@ class Server(TriangleController, BaseWidget):
         self._changeButton     = ControlButton('Change')
         self._importButton     = ControlButton('Import dump')
         self._exportButton     = ControlButton('Export dump')
-
+        
+        tcpServer.serverProgram()
         self._list.horizontal_headers = ['Triangle ID', 'Vertex 1', 'Vertex 2', 'Vertex 3']
         #Define the function that will be called when a file is selected
         #self._videofile.changed_event     = self.__videoFileSelectionEvent

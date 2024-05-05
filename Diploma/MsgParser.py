@@ -26,8 +26,13 @@ class MsgParser():
                 if k in range(8):
                     self._tmp.pop()
                 break
-        if len(self._tmp) < sys.getsizeof(SecondMessage):
-            self_res = cast(self._tmp, FirstMessage)
+        cTypeArray = c_char * len(self._tmp)
+        for i in range(0, len(self._tmp)-1)
+            cTypeArray[i] = self._tmp[i]
+        if sys.getsizeof(cTypeArray) < sys.getsizeof(SecondMessage):
+            self._res = cast(cTypeArray, FirstMessage)
         else:
-            self_res = cast(self._tmp, SecondMessage)
+            self._res = cast(cTypeArray, SecondMessage)
         
+    def getMsg(self):
+        return self._res
