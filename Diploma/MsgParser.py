@@ -27,7 +27,7 @@ class MsgParser():
                     self._tmp.pop()
                 break
         cTypeArray = c_char * len(self._tmp)
-        for i in range(0, len(self._tmp)-1)
+        for i in range(0, len(self._tmp)-1):
             cTypeArray[i] = self._tmp[i]
         if sys.getsizeof(cTypeArray) < sys.getsizeof(SecondMessage):
             self._res = cast(cTypeArray, FirstMessage)

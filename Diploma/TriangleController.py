@@ -18,3 +18,4 @@ class TriangleController(object):
     def load(self, filename):
         pkl_file = open(filename, 'rb')
         self._triangles = pickle.load(pkl_file)
+        

@@ -6,16 +6,17 @@ from pyforms.controls   import ControlSlider
 from pyforms.controls   import ControlPlayer
 from pyforms.controls   import ControlButton
 from pyforms.controls   import ControlList
+from pyforms import start_app
 from Triangle           import Triangle
 from TriangleController import TriangleController
 from TCPServer          import TCPServer
+import asyncio
 
 class Server(TriangleController, BaseWidget):
 
     def __init__(self, *args, **kwargs):
         TriangleController.__init__(self)
         BaseWidget.__init__(self,'Server')
-        tcpServer = TCPServer()
 
         #Definition of the forms fields
         self._tmpTriangle     = Triangle('-1', '-1', '-1', '-1')
@@ -30,7 +31,6 @@ class Server(TriangleController, BaseWidget):
         self._importButton     = ControlButton('Import dump')
         self._exportButton     = ControlButton('Export dump')
         
-        tcpServer.serverProgram()
         self._list.horizontal_headers = ['Triangle ID', 'Vertex 1', 'Vertex 2', 'Vertex 3']
         #Define the function that will be called when a file is selected
         #self._videofile.changed_event     = self.__videoFileSelectionEvent
@@ -104,8 +104,8 @@ class Server(TriangleController, BaseWidget):
         """
         self.removeTriangleFromList( self._list.selected_row_index )
 
+async def main():
+    await asyncio.gather(start_app(Server), TCPServer().runServer())
 
 if __name__ == '__main__':
-
-    from pyforms import start_app
-    start_app(Server)
+    asyncio.run(main())
