@@ -14,6 +14,7 @@ class PostController(object):
         #fs = gridfs.GridFS(mydb, collection="files")
         self.coll1 = mydb["firstmsg"]
         self.coll2 = mydb["secondmsg"]
+        self.coll3 = mydb["post"]
 
     def addPost(self, post):
         self._posts.append(post)
@@ -61,7 +62,8 @@ class PostController(object):
             "timestamp" = tmpMsg["timestamp"],
             "mpX": tmpMsg["mp4x"],
             "mpY": tmpMsg["mp4y"],
-            "mpDb": tmpMsg["mp4Db"]
+            "mpDb": tmpMsg["mp4Db"],
+            "audioID": tmpMsg["audioID"]
             }
         
     def calculateLatitudeAndLongitude(self, firstVertex, secondVertex, thirdVertex):
@@ -70,10 +72,34 @@ class PostController(object):
         r3 = self._coefficientOne * thirdVertex["mpDb"]
         
     def triangleToPost(self, triangle):
-        post = Post()
         firstVertex = self.findVertexByID(triangle._firstVertex)
         secondVertex = self.findVertexByID(triangle._secondVertex)
         thirdVertex = self.findVertexByID(triangle._thirdVertex)
-        post._timestamp = firstVertex["timestamp"]
-        post._triangleID = triangle._triangleID
+        tmpPost = coll3.find_one({}, sort=[('_id', -1)])
+        postID = None
+        if tmpPost: 
+            postID = tmpPost
+        else:
+            postID = 1
+        timestamp = firstVertex["timestamp"]
+        triangleID = triangle._triangleID
+        latitude = 1
+        longitude = 1
+        address = "test"
+        audioID = None
+        if firstVertex["mpString"] == "mp4id"
+            audioID = firstVertex["audioID"]
+        elif secondVertex["mpString"] == "mp4id"
+            audioID = secondVertex["audioID"]
+        elif thirdVertex["mpString"] == "mp4id"
+            audioID = thirdVertex["audioID"]
+        return Post(postID, timestamp, triangleID, latitude, longitude, address, audioID)
         
+    def calculateTriangles(self, triangles):
+        for triangle in triangles:
+            self._posts.append(triangleToPost(triangle))
+        
+    def getPosts(self):
+        tmp = self._posts
+        self._posts.clear()
+        return tmp

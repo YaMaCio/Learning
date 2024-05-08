@@ -5,4 +5,4 @@ class FirstMessage(Structure):
     _fields_ = [("esp32id", c_int),
                 ("mp4id", c_int),
                 ("mp4canddb", CAD),
-                ("audio", c_char * 8192)]
+                ("audio", c_ubyte * 8192)]

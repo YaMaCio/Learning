@@ -19,3 +19,5 @@ class TriangleController(object):
         pkl_file = open(filename, 'rb')
         self._triangles = pickle.load(pkl_file)
         
+    def getTriangles(self):
+        return self._triangles

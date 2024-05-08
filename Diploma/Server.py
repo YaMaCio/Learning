@@ -9,6 +9,7 @@ from pyforms.controls   import ControlList
 from pyforms import start_app
 from Triangle           import Triangle
 from TriangleController import TriangleController
+from PostController     import PostController
 from TCPServer          import TCPServer
 import asyncio
 
@@ -16,7 +17,9 @@ class Server(TriangleController, BaseWidget):
 
     def __init__(self, *args, **kwargs):
         TriangleController.__init__(self)
+        PostController.__init__(self)
         BaseWidget.__init__(self,'Server')
+        self._loop = asyncio.get_event_loop()
 
         #Definition of the forms fields
         self._tmpTriangle     = Triangle('-1', '-1', '-1', '-1')
@@ -31,10 +34,15 @@ class Server(TriangleController, BaseWidget):
         self._importButton     = ControlButton('Import dump')
         self._exportButton     = ControlButton('Export dump')
         
+        self._postList        = ControlList('Post List')
+        
         self._list.horizontal_headers = ['Triangle ID', 'Vertex 1', 'Vertex 2', 'Vertex 3']
+        self._postList.horizontal_headers = ['Timestamp', 'Triangle ID', 'Latitude', 'Longitude', 'Address', 'Audio ID']
+        self._postList.readonly = True
         #Define the function that will be called when a file is selected
         #self._videofile.changed_event     = self.__videoFileSelectionEvent
         #Define the event that will be called when the run button is processed
+        self._refreshMessagesTask = _loop.create_task(self.__refreshMessages)
         self._removeButton.value       = self.__removeEvent
         self._changeButton.value       = self.__changeEvent
         self._addButton.value       = self.__addEvent
@@ -45,7 +53,7 @@ class Server(TriangleController, BaseWidget):
             'a:Triangles':[('_triangleID', '_firstVertex', '_secondVertex', '_thirdVertex'),
             ('_removeButton', '_changeButton', '_addButton'),
             ('_list', ('_importButton', '=', '_exportButton'))],
-            'b:Messages':[]
+            'b:Messages':['_postList']
         }]
 
 
@@ -60,6 +68,20 @@ class Server(TriangleController, BaseWidget):
         Do some processing to the frame and return the result frame
         """
     #    return frame
+    
+    async def __refreshMessages():
+        while True:
+            await asyncio.sleep(3)
+            super(Server, self).calculateTriangles(super(Server, self).getTriangles())
+            posts = super(Server, self).getPosts()
+            postsIDs = {}
+            for i in range(0, self._postList.rows_count()-1)
+                postsIDs.append(self._postList.get_value(1, i))
+            for post in posts
+                if post._postID not in postIDs
+                    self._postList += [post._postID, post._timestamp, post._triangleID, post._latitude, post._longitude, post._address, post._audioID]
+            postsIDs.clear()
+            posts.clear()
     
     def addTriangleToList(self, triangle):
         """
@@ -92,10 +114,10 @@ class Server(TriangleController, BaseWidget):
         self._tmpTriangle._secondVertex           = self._secondVertex.value
         self._tmpTriangle._thirdVertex            = self._thirdVertex.value
         self.addTriangleToList(Triangle(
-        self._triangleID.value,
-        self._firstVertex.value,
-        self._secondVertex.value,
-        self._thirdVertex.value
+            self._triangleID.value,
+            self._firstVertex.value,
+            self._secondVertex.value,
+            self._thirdVertex.value
         ))
 
     def __removeEvent(self):
