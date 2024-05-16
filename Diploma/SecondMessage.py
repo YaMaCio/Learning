@@ -12,5 +12,6 @@ class SecondMessage(object):
         self._esp32id      = esp32id
         self._mp4id     = mp4id
         self._mp4canddb    = mp4canddb
+        self._audio = []
         for i in range(0, 8192-1):
             self._audio[i] = audio[i]

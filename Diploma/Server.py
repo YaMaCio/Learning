@@ -42,7 +42,7 @@ class Server(TriangleController, BaseWidget):
         #Define the function that will be called when a file is selected
         #self._videofile.changed_event     = self.__videoFileSelectionEvent
         #Define the event that will be called when the run button is processed
-        self._refreshMessagesTask = _loop.create_task(self.__refreshMessages)
+        #self._refreshMessagesTask = _loop.create_task(self.__refreshMessages)
         self._removeButton.value       = self.__removeEvent
         self._changeButton.value       = self.__changeEvent
         self._addButton.value       = self.__addEvent
@@ -75,10 +75,10 @@ class Server(TriangleController, BaseWidget):
             super(Server, self).calculateTriangles(super(Server, self).getTriangles())
             posts = super(Server, self).getPosts()
             postsIDs = {}
-            for i in range(0, self._postList.rows_count()-1)
+            for i in range(0, self._postList.rows_count()-1):
                 postsIDs.append(self._postList.get_value(1, i))
-            for post in posts
-                if post._postID not in postIDs
+            for post in posts:
+                if post._postID not in postIDs:
                     self._postList += [post._postID, post._timestamp, post._triangleID, post._latitude, post._longitude, post._address, post._audioID]
             postsIDs.clear()
             posts.clear()
@@ -109,10 +109,10 @@ class Server(TriangleController, BaseWidget):
         """
         Add person button event.
         """
-        self._tmpTriangle._triangleID             = self._triangleID.value
-        self._tmpTriangle._firstVertex            = self._firstVertex.value
-        self._tmpTriangle._secondVertex           = self._secondVertex.value
-        self._tmpTriangle._thirdVertex            = self._thirdVertex.value
+        #self._tmpTriangle._triangleID             = self._triangleID.value
+        #self._tmpTriangle._firstVertex            = self._firstVertex.value
+        #self._tmpTriangle._secondVertex           = self._secondVertex.value
+        #self._tmpTriangle._thirdVertex            = self._thirdVertex.value
         self.addTriangleToList(Triangle(
             self._triangleID.value,
             self._firstVertex.value,

@@ -9,6 +9,8 @@ class MsgParser():
         self._tmp = []
         self._res = None
         self._audio = c_ubyte * 8192
+        cdll.LoadLibrary("./cppWinForServer.so")
+        self._libcpp = CDLL("./cppWinForServer.so") 
         
     def setMessage(self, msg):
         self._msg = msg
@@ -29,21 +31,26 @@ class MsgParser():
                 endFlag = True
                 for k in range(8):
                     self._tmp.pop()
-            if endFlag == True    
+            if endFlag == True:    
                 break
                 
         cTypeArray = c_ubyte * len(self._tmp)
         
         for i in range(0, len(self._tmp)-1):
             cTypeArray[i] = self._tmp[i]
-        if sys.getsizeof(cTypeArray) < sys.getsizeof(SecondMessage):
-            self._res = FirstMessageCString(pointer(ByteArrayToFirstMessage(cTypeArray))).value
+        if len(cTypeArray) < 8212:
+            self._res = self._libcpp.FirstMessageCString(pointer(self._libcpp.ByteArrayToFirstMessage(cTypeArray))).value
+            self._size = 52
         else:
-            self._res = SecondMessageCString(pointer(ByteArrayToSecondMessage(cTypeArray))).value
-            ExtractAudioFromSecondMessage(pointer(ByteArrayToSecondMessage(cTypeArray)), self._audio)
+            self._res = self._libcpp.SecondMessageCString(pointer(self._libcpp.ByteArrayToSecondMessage(cTypeArray))).value
+            self._libcpp.ExtractAudioFromSecondMessage(pointer(self._libcpp.ByteArrayToSecondMessage(cTypeArray)), self._audio)
+            self._size = 8212
         
-    def getMessage(self):
-        return self._msg
+    def getSize(self):
+        return self._size
+    
+    def getTempMessage(self):
+        return self._tmp
     
     def getJSONString(self):
         return self._res

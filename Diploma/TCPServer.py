@@ -1,5 +1,6 @@
 import socket
 from pymongo import MongoClient
+#import pymongo
 import gridfs
 from time import gmtime, strftime
 from ctypes import *
@@ -9,14 +10,14 @@ import DBFunctions
 import asyncio
 
 class TCPServer:
-    async def handle_client(self, client):
+    async def handle_client(self, client, mydb, fs, coll1, coll2):
         loop = asyncio.get_event_loop()
         request = None
         msgParser = MsgParser()
         while request != 'quit':
             request = (await loop.sock_recv(client, 16384))
             msgParser.setMessage(data)
-            if sys.getsizeof(msgParser.getTempMessage()) < sys.getsizeof(cSecondMessage):
+            if msgParser.getSize() < 8212:
                 timestamp = strftime("%Y-%m-%d %H:%M:%S", gmtime())
                 tmpdict = loads(msgParser.getJSONString())
                 tmpdict['timestamp'] = timestamp
@@ -24,9 +25,12 @@ class TCPServer:
             else:
                 timeInSec = time() - 5
                 timestamp = strftime("%Y-%m-%d %H:%M:%S", gmtime(timeInSec))
-                uploadDataAsFile(msgParser.getMsg().audio, fs, timestamp + ".mp3")
+                audio = []
+                msgParser.getAudio(audio)
+                uploadDataAsFile(audio, fs, timestamp + ".mp3")
                 fileID = findFileInDB(mydb, fs, timestamp + ".mp3")
                 tmpdict = loads(msgParser.getJSONString())
+                tmpdict['timestamp'] = timestamp
                 tmpdict['audioID'] = fileID
                 tmp = coll2.insert_one(tmpdict)
         client.close()
@@ -53,7 +57,7 @@ class TCPServer:
         print("Connection from: " + str(address))
         while True:
             conn, address = await loop.sock_accept(server_socket)
-            loop.create_task(self.handle_client(client))
+            loop.create_task(self.handle_client(client, mydb, fs, coll1, coll2))
             # receive data stream. it won't accept data packet greater than 10240 bytes
             #data = conn.recv(16384)
             #msgParser.setMsg(data)

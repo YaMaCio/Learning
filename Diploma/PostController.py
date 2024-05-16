@@ -1,6 +1,7 @@
 import pickle
 import Post
 from pymongo import MongoClient
+#import pymongo
 
 class PostController(object):
 
@@ -10,11 +11,11 @@ class PostController(object):
         self._coefficientTwo = 1
         self._coefficientThree = 1
         self.myclient = MongoClient("mongodb+srv://vitaliyskromyda:test@clusterdb.4wu0t0a.mongodb.net/?retryWrites=true&w=majority&appName=clusterdb", port=27017)
-        self.mydb = myclient["clusterdb"]
+        self.mydb = self.myclient["clusterdb"]
         #fs = gridfs.GridFS(mydb, collection="files")
-        self.coll1 = mydb["firstmsg"]
-        self.coll2 = mydb["secondmsg"]
-        self.coll3 = mydb["post"]
+        self.coll1 = self.mydb["firstmsg"]
+        self.coll2 = self.mydb["secondmsg"]
+        self.coll3 = self.mydb["post"]
 
     def addPost(self, post):
         self._posts.append(post)
@@ -32,38 +33,42 @@ class PostController(object):
         
     def findVertexByID(self, id):
         tmpMsg = None
-        if tmpMsg = self.coll1.find_one({"mp1id": str(id)}, sort=[("_id", -1)]):
+        tmpMsg1 = self.coll1.find_one({"mp1id": str(id)}, sort=[("_id", -1)])
+        tmpMsg2 = self.coll1.find_one({"mp2id": str(id)}, sort=[("_id", -1)])
+        tmpMsg3 = self.coll1.find_one({"mp3id": str(id)}, sort=[("_id", -1)])
+        tmpMsg4 = self.coll2.find_one({"mp4id": str(id)}, sort=[("_id", -1)])
+        if tmpMsg1:
             return {
-            "mpString" = "mp1id",
-            "timestamp" = tmpMsg["timestamp"],
-            "mpX": tmpMsg["mp1x"],
-            "mpY": tmpMsg["mp1y"],
-            "mpDb": tmpMsg["mp1Db"]
+            "mpString": "mp1id",
+            "timestamp": tmpMsg1["timestamp"],
+            "mpX": tmpMsg1["mp1x"],
+            "mpY": tmpMsg1["mp1y"],
+            "mpDb": tmpMsg1["mp1Db"]
             }
-        elif tmpMsg = self.coll1.find_one({"mp2id": str(id)}, sort=[("_id", -1)]):
+        elif tmpMsg2:
             return {
-            "mpString" = "mp2id",
-            "timestamp" = tmpMsg["timestamp"],
-            "mpX": tmpMsg["mp2x"],
-            "mpY": tmpMsg["mp2y"],
-            "mpDb": tmpMsg["mp2Db"]
+            "mpString": "mp2id",
+            "timestamp": tmpMsg2["timestamp"],
+            "mpX": tmpMsg2["mp2x"],
+            "mpY": tmpMsg2["mp2y"],
+            "mpDb": tmpMsg2["mp2Db"]
             }
-        elif tmpMsg = self.coll1.find_one({"mp3id": str(id)}, sort=[("_id", -1)]):
+        elif tmpMsg3:
             return {
-            "mpString" = "mp3id",
-            "timestamp" = tmpMsg["timestamp"],
-            "mpX": tmpMsg["mp3x"],
-            "mpY": tmpMsg["mp3y"],
-            "mpDb": tmpMsg["mp3Db"]
+            "mpString": "mp3id",
+            "timestamp": tmpMsg3["timestamp"],
+            "mpX": tmpMsg3["mp3x"],
+            "mpY": tmpMsg3["mp3y"],
+            "mpDb": tmpMsg3["mp3Db"]
             }
-        elif tmpMsg = self.coll2.find_one({"mp4id": str(id)}, sort=[("_id", -1)]):
+        elif tmpMsg4:
             return {
-            "mpString" = "mp4id",
-            "timestamp" = tmpMsg["timestamp"],
-            "mpX": tmpMsg["mp4x"],
-            "mpY": tmpMsg["mp4y"],
-            "mpDb": tmpMsg["mp4Db"],
-            "audioID": tmpMsg["audioID"]
+            "mpString": "mp4id",
+            "timestamp": tmpMsg4["timestamp"],
+            "mpX": tmpMsg4["mp4x"],
+            "mpY": tmpMsg4["mp4y"],
+            "mpDb": tmpMsg4["mp4Db"],
+            "audioID": tmpMsg4["audioID"]
             }
         
     def calculateLatitudeAndLongitude(self, firstVertex, secondVertex, thirdVertex):
@@ -87,11 +92,11 @@ class PostController(object):
         longitude = 1
         address = "test"
         audioID = None
-        if firstVertex["mpString"] == "mp4id"
+        if firstVertex["mpString"] == "mp4id":
             audioID = firstVertex["audioID"]
-        elif secondVertex["mpString"] == "mp4id"
+        elif secondVertex["mpString"] == "mp4id":
             audioID = secondVertex["audioID"]
-        elif thirdVertex["mpString"] == "mp4id"
+        elif thirdVertex["mpString"] == "mp4id":
             audioID = thirdVertex["audioID"]
         return Post(postID, timestamp, triangleID, latitude, longitude, address, audioID)
         

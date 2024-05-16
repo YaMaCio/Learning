@@ -1,19 +1,19 @@
-#include "cInclude\functions.h"
+#include "cInclude\winfunctions.h"
 using json = nlohmann::json;
 
-int __cdecl FirstMessageToByteArray(FirstMessage* fm, unsigned char* byteArray)
+int __stdcall FirstMessageToByteArray(FirstMessage* fm, unsigned char* byteArray)
 {
 	memcpy(byteArray, reinterpret_cast<unsigned char*>(fm), sizeof(FirstMessage));
 	return sizeof(FirstMessage);
 }
 
-FirstMessage __cdecl ByteArrayToFirstMessage(unsigned char* byteArray)
+FirstMessage __stdcall ByteArrayToFirstMessage(unsigned char* byteArray)
 {
 	FirstMessage firstMessage = *(reinterpret_cast<FirstMessage*>(byteArray));
 	return firstMessage;
 }
 
-const char* __cdecl FirstMessageCString(FirstMessage* fm)
+const char* __stdcall FirstMessageCString(FirstMessage* fm)
 {
 	json tmp = {
 	  {"esp32ID", fm->esp32ID},
@@ -39,19 +39,19 @@ const char* __cdecl FirstMessageCString(FirstMessage* fm)
 	return tmp.dump().c_str();
 }
 
-int __cdecl SecondMessageToByteArray(SecondMessage* sm, unsigned char* byteArray)
+int __stdcall SecondMessageToByteArray(SecondMessage* sm, unsigned char* byteArray)
 {
 	memcpy(byteArray, reinterpret_cast<unsigned char*>(sm), sizeof(SecondMessage));
 	return sizeof(SecondMessage);
 }
 
-SecondMessage __cdecl ByteArrayToSecondMessage(unsigned char* byteArray)
+SecondMessage __stdcall ByteArrayToSecondMessage(unsigned char* byteArray)
 {
 	SecondMessage secondMessage = *(reinterpret_cast<SecondMessage*>(byteArray));
 	return secondMessage;
 }
 
-const char* __cdecl SecondMessageCString(SecondMessage* sm)
+const char* __stdcall SecondMessageCString(SecondMessage* sm)
 {
 	json tmp = {
 	  {"esp32ID", sm->esp32ID},
@@ -65,12 +65,12 @@ const char* __cdecl SecondMessageCString(SecondMessage* sm)
 	return tmp.dump().c_str();
 }
 
-void __cdecl ExtractAudioFromSecondMessage(SecondMessage* sm, unsigned char* byteArray)
+void __stdcall ExtractAudioFromSecondMessage(SecondMessage* sm, unsigned char* byteArray)
 {
 	memcpy(byteArray, sm->audio, 8192);
 }
 
-FirstMessage __cdecl getFirstMessageInstance()
+FirstMessage __stdcall getFirstMessageInstance()
 {
 	FirstMessage fm;
 	fm.esp32ID = 1;
@@ -89,7 +89,7 @@ FirstMessage __cdecl getFirstMessageInstance()
 	return fm;
 }
 
-SecondMessage __cdecl getSecondMessageInstance()
+SecondMessage __stdcall getSecondMessageInstance()
 {
 	SecondMessage sm;
 	sm.esp32ID = 1;
