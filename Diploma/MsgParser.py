@@ -9,8 +9,8 @@ class MsgParser():
         self._tmp = []
         self._res = None
         self._audio = c_ubyte * 8192
-        cdll.LoadLibrary("./cppWinForServer.so")
-        self._libcpp = CDLL("./cppWinForServer.so") 
+        cdll.LoadLibrary("./cppForServer.dll")
+        self._libcpp = CDLL("./cppForServer.dll") 
         
     def setMessage(self, msg):
         self._msg = msg

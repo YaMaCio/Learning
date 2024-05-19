@@ -1,0 +1,17 @@
+﻿  pch.cpp
+  dllmain.cpp
+  winfunctions.cpp
+C:\Users\ext4enjoyer\source\repos\cppForServer\cppForServer\winfunctions.cpp(5,1): warning C4005: 'CPPFORSERVER_API': macro redefinition
+C:\Users\ext4enjoyer\source\repos\cppForServer\cppForServer\winfunctions.cpp(3): message : see previous definition of 'CPPFORSERVER_API'
+C:\Users\ext4enjoyer\source\repos\cppForServer\cppForServer\winfunctions.cpp(3): warning C4603: 'CPPFORSERVER_API': macro is not defined or definition is different after precompiled header use
+C:\Users\ext4enjoyer\source\repos\cppForServer\cppForServer\winfunctions.cpp(3): message : Add macro to precompiled header instead of defining here
+C:\Users\ext4enjoyer\source\repos\cppForServer\cppForServer\winfunctions.cpp(7): message : use of precompiled header
+C:\Users\ext4enjoyer\source\repos\cppForServer\cppForServer\winfunctions.cpp(5): warning C4603: 'CPPFORSERVER_API': macro is not defined or definition is different after precompiled header use
+C:\Users\ext4enjoyer\source\repos\cppForServer\cppForServer\winfunctions.cpp(5): message : Add macro to precompiled header instead of defining here
+C:\Users\ext4enjoyer\source\repos\cppForServer\cppForServer\winfunctions.cpp(7): message : use of precompiled header
+     Creating library C:\Users\ext4enjoyer\source\repos\cppForServer\Release\cppForServer.lib and object C:\Users\ext4enjoyer\source\repos\cppForServer\Release\cppForServer.exp
+  Generating code
+  Previous IPDB not found, fall back to full compilation.
+  All 915 functions were compiled because no usable IPDB/IOBJ from previous compilation was found.
+  Finished generating code
+  cppForServer.vcxproj -> C:\Users\ext4enjoyer\source\repos\cppForServer\Release\cppForServer.dll

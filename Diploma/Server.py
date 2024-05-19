@@ -12,6 +12,7 @@ from TriangleController import TriangleController
 from PostController     import PostController
 from TCPServer          import TCPServer
 import asyncio
+import logging
 
 class Server(TriangleController, BaseWidget):
 
@@ -19,7 +20,9 @@ class Server(TriangleController, BaseWidget):
         TriangleController.__init__(self)
         PostController.__init__(self)
         BaseWidget.__init__(self,'Server')
+        logging.basicConfig(level=logging.INFO, filename="serverGUI.log", filemode="w", format="%(asctime)s - %(levelname)s - %(message)s")
         self._loop = asyncio.get_event_loop()
+        logging.info("Class Server initialized")
 
         #Definition of the forms fields
         self._tmpTriangle     = Triangle('-1', '-1', '-1', '-1')
@@ -70,6 +73,7 @@ class Server(TriangleController, BaseWidget):
     #    return frame
     
     async def __refreshMessages():
+        logging.info("Start refreshing messages")
         while True:
             await asyncio.sleep(3)
             super(Server, self).calculateTriangles(super(Server, self).getTriangles())
@@ -82,6 +86,7 @@ class Server(TriangleController, BaseWidget):
                     self._postList += [post._postID, post._timestamp, post._triangleID, post._latitude, post._longitude, post._address, post._audioID]
             postsIDs.clear()
             posts.clear()
+        logging.info("End refreshing messages")
     
     def addTriangleToList(self, triangle):
         """
@@ -126,8 +131,18 @@ class Server(TriangleController, BaseWidget):
         """
         self.removeTriangleFromList( self._list.selected_row_index )
 
-async def main():
-    await asyncio.gather(start_app(Server), TCPServer().runServer())
+async def main(tcpsFunc):
+    logging.info("Entered in main()")
+    task2 = asyncio.create_task(tcpsFunc())
+    logging.info("Started TCPServer thread")
+    task1 = asyncio.create_task(start_app(Server))
+    logging.info("Started ServerGUI thread")
+    #await asyncio.gather(start_app(Server), tcpServer.runServer())
+    await task1
+    await task2
 
 if __name__ == '__main__':
-    asyncio.run(main())
+    logging.info("Creating TCPServer object and starting async")
+    tcpServer = TCPServer()
+    tcpsFunc = tcpServer.runServer
+    asyncio.run(main(tcpsFunc))
