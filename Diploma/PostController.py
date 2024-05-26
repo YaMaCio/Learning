@@ -1,6 +1,8 @@
 import pickle
 import Post
-from pymongo import MongoClient
+from pymongo import * #MongoClient
+import json
+from bson import json_util
 #import pymongo
 
 class PostController(object):
@@ -33,41 +35,41 @@ class PostController(object):
         
     def findVertexByID(self, id):
         tmpMsg = None
-        tmpMsg1 = self.coll1.find_one({"mp1id": str(id)}, sort=[("_id", -1)])
-        tmpMsg2 = self.coll1.find_one({"mp2id": str(id)}, sort=[("_id", -1)])
-        tmpMsg3 = self.coll1.find_one({"mp3id": str(id)}, sort=[("_id", -1)])
-        tmpMsg4 = self.coll2.find_one({"mp4id": str(id)}, sort=[("_id", -1)])
-        if tmpMsg1:
+        tmpMsg1 = self.coll1.find_one({"mp1ID": id}, sort=[("_id", -1)])
+        tmpMsg2 = self.coll1.find_one({"mp2ID": id}, sort=[("_id", -1)])
+        tmpMsg3 = self.coll1.find_one({"mp3ID": id}, sort=[("_id", -1)])
+        tmpMsg4 = self.coll2.find_one({"mp4ID": id}, sort=[("_id", -1)])
+        if tmpMsg1 != None:
             return {
-            "mpString": "mp1id",
+            "mpString": "mp1ID",
             "timestamp": tmpMsg1["timestamp"],
-            "mpX": tmpMsg1["mp1x"],
-            "mpY": tmpMsg1["mp1y"],
-            "mpDb": tmpMsg1["mp1Db"]
+            "mpX": tmpMsg1["mp1CAndDb"]["x"],
+            "mpY": tmpMsg1["mp1CAndDb"]["y"],
+            "mpDb": tmpMsg1["mp1CAndDb"]["db"]
             }
-        elif tmpMsg2:
+        elif tmpMsg2 != None:
             return {
-            "mpString": "mp2id",
+            "mpString": "mp2ID",
             "timestamp": tmpMsg2["timestamp"],
-            "mpX": tmpMsg2["mp2x"],
-            "mpY": tmpMsg2["mp2y"],
-            "mpDb": tmpMsg2["mp2Db"]
+            "mpX": tmpMsg2["mp2CAndDb"]["x"],
+            "mpY": tmpMsg2["mp2CAndDb"]["y"],
+            "mpDb": tmpMsg2["mp2CAndDb"]["db"]
             }
-        elif tmpMsg3:
+        elif tmpMsg3 != None:
             return {
-            "mpString": "mp3id",
+            "mpString": "mp3ID",
             "timestamp": tmpMsg3["timestamp"],
-            "mpX": tmpMsg3["mp3x"],
-            "mpY": tmpMsg3["mp3y"],
-            "mpDb": tmpMsg3["mp3Db"]
+            "mpX": tmpMsg3["mp3CAndDb"]["x"],
+            "mpY": tmpMsg3["mp3CAndDb"]["y"],
+            "mpDb": tmpMsg3["mp3CAndDb"]["db"]
             }
-        elif tmpMsg4:
+        elif tmpMsg4 != None:
             return {
-            "mpString": "mp4id",
+            "mpString": "mp4ID",
             "timestamp": tmpMsg4["timestamp"],
-            "mpX": tmpMsg4["mp4x"],
-            "mpY": tmpMsg4["mp4y"],
-            "mpDb": tmpMsg4["mp4Db"],
+            "mpX": tmpMsg4["mp4CAndDb"]["x"],
+            "mpY": tmpMsg4["mp4CAndDb"]["y"],
+            "mpDb": tmpMsg4["mp4CAndDb"]["db"],
             "audioID": tmpMsg4["audioID"]
             }
         
@@ -77,34 +79,35 @@ class PostController(object):
         r3 = self._coefficientOne * thirdVertex["mpDb"]
         
     def triangleToPost(self, triangle):
-        firstVertex = self.findVertexByID(triangle._firstVertex)
-        secondVertex = self.findVertexByID(triangle._secondVertex)
-        thirdVertex = self.findVertexByID(triangle._thirdVertex)
-        tmpPost = coll3.find_one({}, sort=[('_id', -1)])
+        firstVertex = self.findVertexByID(int(triangle._firstVertex))
+        secondVertex = self.findVertexByID(int(triangle._secondVertex))
+        thirdVertex = self.findVertexByID(int(triangle._thirdVertex))
+        tmpPost = self.coll3.find_one({}, sort=[('_id', -1)])
         postID = None
         if tmpPost: 
-            postID = tmpPost
+            postID = tmpPost["_postID"] + 1
         else:
             postID = 1
         timestamp = firstVertex["timestamp"]
-        triangleID = triangle._triangleID
+        triangleID = int(triangle._triangleID)
         latitude = 1
         longitude = 1
         address = "test"
         audioID = None
-        if firstVertex["mpString"] == "mp4id":
+        if firstVertex["mpString"] == "mp4ID":
             audioID = firstVertex["audioID"]
-        elif secondVertex["mpString"] == "mp4id":
+        elif secondVertex["mpString"] == "mp4ID":
             audioID = secondVertex["audioID"]
-        elif thirdVertex["mpString"] == "mp4id":
+        elif thirdVertex["mpString"] == "mp4ID":
             audioID = thirdVertex["audioID"]
-        return Post(postID, timestamp, triangleID, latitude, longitude, address, audioID)
+        tmpRetPost = Post.Post(postID, timestamp, triangleID, latitude, longitude, address, audioID)
+        tmp = self.coll3.insert_one(json.loads(json_util.dumps(vars(tmpRetPost))))
+        return tmpRetPost
         
     def calculateTriangles(self, triangles):
         for triangle in triangles:
-            self._posts.append(triangleToPost(triangle))
+            self._posts.append(self.triangleToPost(triangle))
         
     def getPosts(self):
         tmp = self._posts
-        self._posts.clear()
         return tmp

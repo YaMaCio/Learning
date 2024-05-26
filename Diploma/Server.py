@@ -1,27 +1,25 @@
 import pyforms
 from pyforms.basewidget import BaseWidget
-from pyforms.controls   import ControlFile
+#from pyforms.controls   import ControlFile
 from pyforms.controls   import ControlText
-from pyforms.controls   import ControlSlider
-from pyforms.controls   import ControlPlayer
+#from pyforms.controls   import ControlSlider
+#from pyforms.controls   import ControlPlayer
 from pyforms.controls   import ControlButton
 from pyforms.controls   import ControlList
 from pyforms import start_app
 from Triangle           import Triangle
 from TriangleController import TriangleController
 from PostController     import PostController
-from TCPServer          import TCPServer
+#from TCPServer          import TCPServer
 import asyncio
 import logging
 
-class Server(TriangleController, BaseWidget):
-
+class Server(BaseWidget, TriangleController, PostController):
     def __init__(self, *args, **kwargs):
+        BaseWidget.__init__(self, 'Server')
         TriangleController.__init__(self)
         PostController.__init__(self)
-        BaseWidget.__init__(self,'Server')
-        logging.basicConfig(level=logging.INFO, filename="serverGUI.log", filemode="w", format="%(asctime)s - %(levelname)s - %(message)s")
-        self._loop = asyncio.get_event_loop()
+        #self._loop = asyncio.get_event_loop()
         logging.info("Class Server initialized")
 
         #Definition of the forms fields
@@ -38,9 +36,10 @@ class Server(TriangleController, BaseWidget):
         self._exportButton     = ControlButton('Export dump')
         
         self._postList        = ControlList('Post List')
-        
+        self._refresh = ControlButton('Refresh')
+
         self._list.horizontal_headers = ['Triangle ID', 'Vertex 1', 'Vertex 2', 'Vertex 3']
-        self._postList.horizontal_headers = ['Timestamp', 'Triangle ID', 'Latitude', 'Longitude', 'Address', 'Audio ID']
+        self._postList.horizontal_headers = ['Post ID', 'Timestamp', 'Triangle ID', 'Latitude', 'Longitude', 'Address', 'Audio ID']
         self._postList.readonly = True
         #Define the function that will be called when a file is selected
         #self._videofile.changed_event     = self.__videoFileSelectionEvent
@@ -49,6 +48,7 @@ class Server(TriangleController, BaseWidget):
         self._removeButton.value       = self.__removeEvent
         self._changeButton.value       = self.__changeEvent
         self._addButton.value       = self.__addEvent
+        self._refresh.value = self.__refreshMessages
         #Define the event called before showing the image in the player
 
         #Define the organization of the Form Controls
@@ -56,7 +56,7 @@ class Server(TriangleController, BaseWidget):
             'a:Triangles':[('_triangleID', '_firstVertex', '_secondVertex', '_thirdVertex'),
             ('_removeButton', '_changeButton', '_addButton'),
             ('_list', ('_importButton', '=', '_exportButton'))],
-            'b:Messages':['_postList']
+            'b:Messages':['_postList', '_refresh']
         }]
 
 
@@ -72,18 +72,19 @@ class Server(TriangleController, BaseWidget):
         """
     #    return frame
     
-    async def __refreshMessages():
-        logging.info("Start refreshing messages")
+    @classmethod
+    async def __refreshMessages(cls):
         while True:
-            await asyncio.sleep(3)
-            super(Server, self).calculateTriangles(super(Server, self).getTriangles())
-            posts = super(Server, self).getPosts()
-            postsIDs = {}
-            for i in range(0, self._postList.rows_count()-1):
-                postsIDs.append(self._postList.get_value(1, i))
+            logging.info("Start refreshing messages")
+            await asyncio.sleep(20)
+            super(Server, cls).calculateTriangles(super(Server, cls).getTriangles())
+            posts = super(Server, cls).getPosts()
+            postsIDs = []
+            for i in range(0, cls._postList.rows_count-1):
+                postsIDs.append(cls._postList.get_value(1, i))
             for post in posts:
-                if post._postID not in postIDs:
-                    self._postList += [post._postID, post._timestamp, post._triangleID, post._latitude, post._longitude, post._address, post._audioID]
+                if post._postID not in postsIDs:
+                    cls._postList += [post._postID, post._timestamp, post._triangleID, post._latitude, post._longitude, post._address, post._audioID]
             postsIDs.clear()
             posts.clear()
         logging.info("End refreshing messages")
@@ -131,18 +132,25 @@ class Server(TriangleController, BaseWidget):
         """
         self.removeTriangleFromList( self._list.selected_row_index )
 
-async def main(tcpsFunc):
+async def main():
+    #loop = asyncio.get_running_loop()
+    #loop.set_debug(True)
     logging.info("Entered in main()")
-    task2 = asyncio.create_task(tcpsFunc())
-    logging.info("Started TCPServer thread")
-    task1 = asyncio.create_task(start_app(Server))
+    #logging.info("Started TCPServer thread")
+    blockingTask = asyncio.to_thread(start_app, Server)
+    await asyncio.sleep(20)
+    #task2 = asyncio.create_task(blockingTask)
     logging.info("Started ServerGUI thread")
-    #await asyncio.gather(start_app(Server), tcpServer.runServer())
-    await task1
+    task2 = asyncio.create_task(Server.__refreshMessages())
+    #await asyncio.gather(start_app(server), server.runServer())
+    await blockingTask
     await task2
 
 if __name__ == '__main__':
-    logging.info("Creating TCPServer object and starting async")
-    tcpServer = TCPServer()
-    tcpsFunc = tcpServer.runServer
-    asyncio.run(main(tcpsFunc))
+    logging.basicConfig(level=logging.DEBUG, filename="serverGUI.log", filemode="w",
+                        format="%(asctime)s - %(levelname)s - %(message)s")
+    logging.info("Starting ServerGUI")
+    #start_app(Server)
+    #server = Server
+    #tcpsFunc = tcpServer.runServer
+    asyncio.run(main(), debug = True)
