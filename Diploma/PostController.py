@@ -34,7 +34,6 @@ class PostController(object):
         self._posts = pickle.load(pkl_file)
         
     def findVertexByID(self, id):
-        tmpMsg = None
         tmpMsg1 = self.coll1.find_one({"mp1ID": id}, sort=[("_id", -1)])
         tmpMsg2 = self.coll1.find_one({"mp2ID": id}, sort=[("_id", -1)])
         tmpMsg3 = self.coll1.find_one({"mp3ID": id}, sort=[("_id", -1)])
@@ -90,6 +89,7 @@ class PostController(object):
             postID = 1
         timestamp = firstVertex["timestamp"]
         triangleID = int(triangle._triangleID)
+        #lal = calculateLatitudeAndLongitude()
         latitude = 1
         longitude = 1
         address = "test"

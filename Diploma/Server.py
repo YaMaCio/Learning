@@ -16,6 +16,7 @@ import logging
 
 class Server(BaseWidget, TriangleController, PostController):
     def __init__(self, *args, **kwargs):
+        logging.info("Initializing")
         BaseWidget.__init__(self, 'Server')
         TriangleController.__init__(self)
         PostController.__init__(self)
@@ -59,35 +60,37 @@ class Server(BaseWidget, TriangleController, PostController):
             'b:Messages':['_postList', '_refresh']
         }]
 
-
-    #def __videoFileSelectionEvent(self):
-        """
-        When the videofile is selected instanciate the video in the player
-        """
-    #    self._player.value = self._videofile.value
-
-    #def __process_frame(self, frame):
-        """
-        Do some processing to the frame and return the result frame
-        """
-    #    return frame
+        eventServerInitialized.set()
     
-    @classmethod
-    async def __refreshMessages(cls):
-        while True:
-            logging.info("Start refreshing messages")
-            await asyncio.sleep(20)
-            super(Server, cls).calculateTriangles(super(Server, cls).getTriangles())
-            posts = super(Server, cls).getPosts()
-            postsIDs = []
-            for i in range(0, cls._postList.rows_count-1):
-                postsIDs.append(cls._postList.get_value(1, i))
-            for post in posts:
-                if post._postID not in postsIDs:
-                    cls._postList += [post._postID, post._timestamp, post._triangleID, post._latitude, post._longitude, post._address, post._audioID]
-            postsIDs.clear()
-            posts.clear()
+    def __refreshMessages(self):
+        logging.info("Start refreshing messages")
+        super(Server, self).calculateTriangles(super(Server, self).getTriangles())
+        posts = super(Server, self).getPosts()
+        trianglesIDs = []
+        for i in range(0, self._postList.rows_count-1):
+            trianglesIDs.append(self._postList.get_value(3, i))
+        for post in posts:
+            if post._triangleID not in trianglesIDs:
+                self._postList += [post._postID, post._timestamp, post._triangleID, post._latitude, post._longitude, post._address, post._audioID]
+        trianglesIDs.clear()
+        posts.clear()
         logging.info("End refreshing messages")
+    
+    #@classmethod
+    #async def __refreshMessages(cls):
+    #    while True:
+    #        logging.info("Start refreshing messages")
+    #        super(Server, cls).calculateTriangles(super(Server, cls).getTriangles())
+    #        posts = super(Server, cls).getPosts()
+    #        postsIDs = []
+    #        for i in range(0, cls._postList.rows_count-1):
+    #            postsIDs.append(cls._postList.get_value(1, i))
+    #        for post in posts:
+    #            if post._postID not in postsIDs:
+    #                cls._postList += [post._postID, post._timestamp, post._triangleID, post._latitude, post._longitude, post._address, post._audioID]
+    #        postsIDs.clear()
+    #        posts.clear()
+    #    logging.info("End refreshing messages")
     
     def addTriangleToList(self, triangle):
         """
@@ -132,25 +135,35 @@ class Server(BaseWidget, TriangleController, PostController):
         """
         self.removeTriangleFromList( self._list.selected_row_index )
 
+async def waitInit():
+    await eventServerInitialized.wait()
+    await asyncio.sleep(3)
+
 async def main():
     #loop = asyncio.get_running_loop()
     #loop.set_debug(True)
     logging.info("Entered in main()")
     #logging.info("Started TCPServer thread")
     blockingTask = asyncio.to_thread(start_app, Server)
-    await asyncio.sleep(20)
+    #asyncio.create_task(start_app(Server)))
+    #to_thread(start_app, Server))
+    #await asyncio.sleep(20)
     #task2 = asyncio.create_task(blockingTask)
+    task1 = asyncio.to_thread(waitInit)
     logging.info("Started ServerGUI thread")
+    await task1
     task2 = asyncio.create_task(Server.__refreshMessages())
     #await asyncio.gather(start_app(server), server.runServer())
-    await blockingTask
     await task2
+    await blockingTask
 
 if __name__ == '__main__':
+    global eventServerInitialized
+    eventServerInitialized = asyncio.Event()
     logging.basicConfig(level=logging.DEBUG, filename="serverGUI.log", filemode="w",
                         format="%(asctime)s - %(levelname)s - %(message)s")
     logging.info("Starting ServerGUI")
-    #start_app(Server)
+    start_app(Server)
     #server = Server
     #tcpsFunc = tcpServer.runServer
-    asyncio.run(main(), debug = True)
+    #asyncio.run(main(), debug = True)
